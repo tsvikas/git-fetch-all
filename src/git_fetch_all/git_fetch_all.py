@@ -16,6 +16,8 @@ from textwrap import indent
 from git import InvalidGitRepositoryError, Repo
 from git.remote import Remote
 
+RemoteName = str
+
 
 async def fetch_remote(remote: Remote) -> None:
     """Fetch a single remote asynchronously using a thread pool."""
@@ -25,8 +27,10 @@ async def fetch_remote(remote: Remote) -> None:
 
 
 async def fetch_single_repo(
-    repo: Repo, include: list[str] | None = None, exclude: list[str] | None = None
-) -> dict[str, Exception | None]:
+    repo: Repo,
+    include: list[RemoteName] | None = None,
+    exclude: list[RemoteName] | None = None,
+) -> dict[RemoteName, Exception | None]:
     """Fetch all remotes for a single repository asynchronously."""
     remotes = list(repo.remotes)
     if include is not None:
@@ -48,12 +52,12 @@ async def fetch_single_repo(
 async def fetch_remotes_in_subfolders(
     folder: Path,
     recurse: int = 3,
-    include: list[str] | None = None,
-    exclude: list[str] | None = None,
+    include: list[RemoteName] | None = None,
+    exclude: list[RemoteName] | None = None,
     exclude_dirs: list[str] | None = None,
     *,
     _recursive_head: bool = True,
-) -> dict[tuple[Path, str], Exception | None]:
+) -> dict[tuple[Path, RemoteName], Exception | None]:
     exclude_dirs = exclude_dirs or []
 
     try:
@@ -94,7 +98,7 @@ async def fetch_remotes_in_subfolders(
 
 
 def print_report(
-    fetch_errors: dict[tuple[Path, str], Exception | None],
+    fetch_errors: dict[tuple[Path, RemoteName], Exception | None],
     basedir: Path,
     *,
     quiet: bool = False,
