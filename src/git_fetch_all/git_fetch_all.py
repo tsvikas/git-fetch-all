@@ -20,18 +20,20 @@ from git.remote import Remote
 RemoteName = str
 
 
-async def fetch_remote(remote: Remote) -> None:
+async def fetch_remote(remote: Remote) -> bool:
     """Fetch a single remote asynchronously using a thread pool."""
     loop = asyncio.get_event_loop()
     with ThreadPoolExecutor() as pool:
-        await loop.run_in_executor(pool, remote.fetch)
+        res = await loop.run_in_executor(pool, remote.fetch)
+        all_uptodate = all((info.flags >> 2) % 2 for info in res)
+        return not all_uptodate
 
 
 async def fetch_single_repo(
     repo: Repo,
     include: list[RemoteName] | None = None,
     exclude: list[RemoteName] | None = None,
-) -> dict[RemoteName, Exception | None]:
+) -> dict[RemoteName, Exception | bool]:
     """Fetch all remotes for a single repository asynchronously."""
     remotes = list(repo.remotes)
     if include is not None:
@@ -45,9 +47,7 @@ async def fetch_single_repo(
             await asyncio.gather(*fetch_tasks, return_exceptions=True),
         )
     )
-    results_ok = {name: exc for name, exc in results.items() if exc is None}
-    results_exceptions = {name: exc for name, exc in results.items() if exc is not None}
-    return results_ok | results_exceptions
+    return results
 
 
 async def fetch_remotes_in_subfolders(
@@ -58,7 +58,7 @@ async def fetch_remotes_in_subfolders(
     exclude_dirs: list[str] | None = None,
     *,
     _recursive_head: bool = True,
-) -> dict[tuple[Path, RemoteName], Exception | None]:
+) -> dict[tuple[Path, RemoteName], Exception | bool]:
     exclude_dirs = exclude_dirs or []
 
     try:
@@ -99,18 +99,18 @@ async def fetch_remotes_in_subfolders(
 
 
 def print_report(
-    fetch_errors: dict[tuple[Path, RemoteName], Exception | None],
+    fetch_results: dict[tuple[Path, RemoteName], Exception | bool],
     basedir: Path,
     *,
     quiet: bool = False,
 ) -> None:
-    for (p, remote), exc in fetch_errors.items():
-        if quiet and exc is None:
+    for (p, remote), res in fetch_results.items():
+        if quiet and not isinstance(res, Exception):
             continue
-        status = "✓" if exc is None else "𐄂"
+        status = "𐄂" if isinstance(res, Exception) else "✓" if res else "-"
         print(f"{status} {p.relative_to(basedir).as_posix()}:{remote}")
-        if exc is not None:
-            print(indent(str(exc), "  "))
+        if isinstance(res, Exception):
+            print(indent(str(res), "  "))
 
 
 def main() -> None:
@@ -135,7 +135,7 @@ def main() -> None:
     )
     args = parser.parse_args()
     basedir = Path(args.DIRECTORY)
-    fetch_errors = asyncio.run(
+    fetch_results = asyncio.run(
         fetch_remotes_in_subfolders(
             basedir,
             args.recurse,
@@ -144,7 +144,7 @@ def main() -> None:
             exclude_dirs=args.exclude_dir,
         )
     )
-    print_report(fetch_errors, basedir, quiet=args.quiet)
+    print_report(fetch_results, basedir, quiet=args.quiet)
 
 
 if __name__ == "__main__":
