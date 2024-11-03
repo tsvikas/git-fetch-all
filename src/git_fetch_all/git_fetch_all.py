@@ -6,6 +6,7 @@ Work asynchronously.
 Run `git-fetch-all -h` for help.
 Requires GitPython package
 """
+# TODO: support submodules
 
 import argparse
 import asyncio
