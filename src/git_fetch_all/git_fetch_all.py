@@ -94,9 +94,14 @@ async def fetch_remotes_in_subfolders(
 
 
 def print_report(
-    fetch_errors: dict[tuple[Path, str], Exception | None], basedir: Path
+    fetch_errors: dict[tuple[Path, str], Exception | None],
+    basedir: Path,
+    *,
+    quiet: bool = False,
 ) -> None:
     for (p, remote), exc in fetch_errors.items():
+        if quiet and exc is None:
+            continue
         status = "✓" if exc is None else "𐄂"
         print(f"{status} {p.relative_to(basedir).as_posix()}:{remote}")
         if exc is not None:
@@ -120,6 +125,9 @@ def main() -> None:
     parser.add_argument(
         "-d", "--exclude-dir", action="append", help="don't include these dirs"
     )
+    parser.add_argument(
+        "-q", "--quiet", action="store_true", help="don't output successful fetches"
+    )
     args = parser.parse_args()
     basedir = Path(args.DIRECTORY)
     fetch_errors = asyncio.run(
@@ -131,7 +139,7 @@ def main() -> None:
             exclude_dirs=args.exclude_dir,
         )
     )
-    print_report(fetch_errors, basedir)
+    print_report(fetch_errors, basedir, quiet=args.quiet)
 
 
 if __name__ == "__main__":
