@@ -31,15 +31,15 @@ async def fetch_remote(remote: Remote) -> bool:
 
 async def fetch_single_repo(
     repo: Repo,
-    include: list[RemoteName] | None = None,
-    exclude: list[RemoteName] | None = None,
+    include_remotes: list[RemoteName] | None = None,
+    exclude_remotes: list[RemoteName] | None = None,
 ) -> dict[RemoteName, Exception | bool]:
     """Fetch all remotes for a single repository asynchronously."""
     remotes = list(repo.remotes)
-    if include is not None:
-        remotes = [r for r in remotes if r.name in include]
-    if exclude is not None:
-        remotes = [r for r in remotes if r.name not in exclude]
+    if include_remotes is not None:
+        remotes = [r for r in remotes if r.name in include_remotes]
+    if exclude_remotes is not None:
+        remotes = [r for r in remotes if r.name not in exclude_remotes]
     fetch_tasks = [fetch_remote(remote) for remote in remotes]
     results = dict(
         zip(
@@ -53,20 +53,20 @@ async def fetch_single_repo(
 async def fetch_remotes_in_subfolders(
     folder: Path,
     recurse: int = 3,
-    include: list[RemoteName] | None = None,
-    exclude: list[RemoteName] | None = None,
-    exclude_dirs: list[str] | None = None,
+    include_remotes: list[RemoteName] | None = None,
+    exclude_remotes: list[RemoteName] | None = None,
+    exclude_dirnames: list[str] | None = None,
     *,
     _recursive_head: bool = True,
 ) -> dict[tuple[Path, RemoteName], Exception | bool]:
-    exclude_dirs = exclude_dirs or []
+    exclude_dirnames = exclude_dirnames or []
 
     try:
         repo = Repo(folder, search_parent_directories=False)
     except InvalidGitRepositoryError:
         pass
     else:
-        result = await fetch_single_repo(repo, include, exclude)
+        result = await fetch_single_repo(repo, include_remotes, exclude_remotes)
         return {(folder, remote): status for remote, status in result.items()}
 
     if recurse == 0:
@@ -77,15 +77,15 @@ async def fetch_remotes_in_subfolders(
         for folder in folder.glob("*")
         if folder.is_dir()
         and not folder.name.startswith(".")
-        and folder.name not in exclude_dirs
+        and folder.name not in exclude_dirnames
     ]
     tasks = [
         fetch_remotes_in_subfolders(
             folder,
             recurse - 1,
-            include,
-            exclude,
-            exclude_dirs=[],
+            include_remotes,
+            exclude_remotes,
+            exclude_dirnames=[],
             _recursive_head=False,
         )
         for folder in folders
@@ -117,7 +117,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         prog="git-fetch-all", description="fetch all git repos in a directory"
     )
-    parser.add_argument("DIRECTORY", help="base directory", default=".", nargs="?")
+    parser.add_argument(
+        "basedir",
+        metavar="BASE_DIR",
+        type=Path,
+        nargs="?",
+        default=".",
+        help="base directory",
+    )
     parser.add_argument(
         "-r", "--recurse", type=int, default=3, help="max recurse in directories"
     )
@@ -128,23 +135,22 @@ def main() -> None:
         "-x", "--exclude-remote", action="append", help="don't include these remotes"
     )
     parser.add_argument(
-        "-d", "--exclude-dir", action="append", help="don't include these dirs"
+        "-d", "--exclude-dirname", action="append", help="don't include these dirs"
     )
     parser.add_argument(
         "-q", "--quiet", action="store_true", help="don't output successful fetches"
     )
     args = parser.parse_args()
-    basedir = Path(args.DIRECTORY)
     fetch_results = asyncio.run(
         fetch_remotes_in_subfolders(
-            basedir,
+            args.basedir,
             args.recurse,
-            include=args.include_remote,
-            exclude=args.exclude_remote,
-            exclude_dirs=args.exclude_dir,
+            args.include_remote,
+            args.exclude_remote,
+            args.exclude_dirname,
         )
     )
-    print_report(fetch_results, basedir, quiet=args.quiet)
+    print_report(fetch_results, args.basedir, quiet=args.quiet)
 
 
 if __name__ == "__main__":
