@@ -8,14 +8,19 @@ Requires GitPython package
 """
 # TODO: support submodules
 
+from __future__ import annotations
+
 import argparse
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from textwrap import indent
+from typing import TYPE_CHECKING
 
 from git import InvalidGitRepositoryError, Repo
-from git.remote import Remote
+
+if TYPE_CHECKING:
+    from git.remote import Remote
 
 RemoteName = str
 
@@ -41,13 +46,12 @@ async def fetch_single_repo(
     if exclude_remotes is not None:
         remotes = [r for r in remotes if r.name not in exclude_remotes]
     fetch_tasks = [fetch_remote(remote) for remote in remotes]
-    results = dict(
+    return dict(
         zip(
             (remote.name for remote in remotes),
             await asyncio.gather(*fetch_tasks, return_exceptions=True),
         )
     )
-    return results
 
 
 async def fetch_remotes_in_subfolders(
