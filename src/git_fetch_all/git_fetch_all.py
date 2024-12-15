@@ -111,13 +111,19 @@ def print_report(
     basedir: Path,
     *,
     quiet: bool = False,
+    color: bool = False,
 ) -> None:
     for (p, remote), res in fetch_results.items():
-        if quiet and not isinstance(res, Exception):
+        fail = isinstance(res, Exception)
+        if quiet and not fail:
             continue
-        status = "𐄂" if isinstance(res, Exception) else "✓" if res else "-"
-        print(f"{status} {p.relative_to(basedir).as_posix()}:{remote}")
-        if isinstance(res, Exception):
+        status = "𐄂" if fail else "✓" if res else "-"
+        color_start = "\033[31m" if color and fail else ""
+        color_end = "\033[0m" if color and fail else ""
+        print(
+            f"{color_start}{status} {p.relative_to(basedir).as_posix()}:{remote}{color_end}"
+        )
+        if fail:
             print(indent(str(res), "  "))
 
 
@@ -148,6 +154,9 @@ def main() -> None:
     parser.add_argument(
         "-q", "--quiet", action="store_true", help="don't output successful fetches"
     )
+    parser.add_argument(
+        "-c", "--color", action="store_true", help="output exceptions in red color"
+    )
     args = parser.parse_args()
     fetch_results = asyncio.run(
         fetch_remotes_in_subfolders(
@@ -158,7 +167,7 @@ def main() -> None:
             args.exclude_dirname,
         )
     )
-    print_report(fetch_results, args.basedir, quiet=args.quiet)
+    print_report(fetch_results, args.basedir, quiet=args.quiet, color=args.color)
 
 
 if __name__ == "__main__":
