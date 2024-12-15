@@ -46,12 +46,16 @@ async def fetch_single_repo(
     if exclude_remotes is not None:
         remotes = [r for r in remotes if r.name not in exclude_remotes]
     fetch_tasks = [fetch_remote(remote) for remote in remotes]
-    return dict(
+    results = dict(
         zip(
             (remote.name for remote in remotes),
             await asyncio.gather(*fetch_tasks, return_exceptions=True),
         )
     )
+    for v in results.values():
+        if isinstance(v, BaseException) and not isinstance(v, Exception):
+            raise v
+    return results
 
 
 async def fetch_remotes_in_subfolders(
