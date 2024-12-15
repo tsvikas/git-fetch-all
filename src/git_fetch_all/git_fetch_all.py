@@ -94,11 +94,11 @@ async def fetch_remotes_in_subfolders(
         )
         for folder in folders
     ]
-    results = await asyncio.gather(*tasks)
+    subfolder_results = await asyncio.gather(*tasks)
 
-    fetched = {}
-    for result in results:
-        fetched = fetched | result
+    fetched: dict[tuple[Path, RemoteName], Exception | bool] = {}
+    for subfolder_result in subfolder_results:
+        fetched = fetched | subfolder_result
     return fetched
 
 
