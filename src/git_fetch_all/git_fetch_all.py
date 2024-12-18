@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from textwrap import indent
@@ -112,7 +113,8 @@ def print_report(
     *,
     quiet: bool = False,
     color: bool = False,
-) -> None:
+) -> bool:
+    error = False
     for (p, remote), res in fetch_results.items():
         fail = isinstance(res, Exception)
         if quiet and not fail:
@@ -125,9 +127,11 @@ def print_report(
         )
         if fail:
             print(indent(str(res), "  "))
+            error = True
+    return error
 
 
-def main() -> None:
+def main() -> bool:
     parser = argparse.ArgumentParser(
         prog="git-fetch-all", description="fetch all git repos in a directory"
     )
@@ -167,8 +171,8 @@ def main() -> None:
             args.exclude_dirname,
         )
     )
-    print_report(fetch_results, args.basedir, quiet=args.quiet, color=args.color)
+    return print_report(fetch_results, args.basedir, quiet=args.quiet, color=args.color)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
