@@ -46,11 +46,12 @@ async def fetch_single_repo(
         remotes = [r for r in remotes if r.name in include_remotes]
     if exclude_remotes is not None:
         remotes = [r for r in remotes if r.name not in exclude_remotes]
-    fetch_tasks = [fetch_remote(remote) for remote in remotes]
+    fetch_tasks = {remote.name: fetch_remote(remote) for remote in remotes}
     results = dict(
         zip(
-            (remote.name for remote in remotes),
-            await asyncio.gather(*fetch_tasks, return_exceptions=True),
+            fetch_tasks.keys(),
+            await asyncio.gather(*fetch_tasks.values(), return_exceptions=True),
+            strict=True,
         )
     )
     for v in results.values():
@@ -123,7 +124,9 @@ def print_report(
         color_start = "\033[31m" if color and fail else ""
         color_end = "\033[0m" if color and fail else ""
         print(
-            f"{color_start}{status} {p.relative_to(basedir).as_posix()}:{remote}{color_end}"
+            f"{color_start}"
+            f"{status} {p.relative_to(basedir).as_posix()}:{remote}"
+            f"{color_end}"
         )
         if fail:
             print(indent(str(res), "  "))
