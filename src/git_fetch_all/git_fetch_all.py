@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "gitpython",
+# ]
+# ///
 """
 Find all subdirectories with git repos, and fetches from all remotes.
 
