@@ -14,20 +14,15 @@ Requires GitPython package
 """
 # TODO: support submodules
 
-from __future__ import annotations
-
 import argparse
 import asyncio
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from textwrap import indent
-from typing import TYPE_CHECKING
 
 from git import InvalidGitRepositoryError, Repo
-
-if TYPE_CHECKING:
-    from git.remote import Remote
+from git.remote import Remote
 
 RemoteName = str
 
