@@ -1,0 +1,16 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v0.14.1-17-g32562d1
+_src_path: gh:tsvikas/python-template
+format_tool: black
+get_package_version_from_vcs: true
+github_user: tsvikas
+has_cli: true
+jupyter_files: forbid
+license: MIT
+package_description: Async fetch for all repos in sub-directories.
+package_name: git_fetch_all
+project_name: git-fetch-all
+python_min: 10
+user_email: tsvikas@gmail.com
+user_name: Tsvika Shapira
+year: 2025
