@@ -48,16 +48,18 @@ async def fetch_single_repo(
     if exclude_remotes is not None:
         remotes = [r for r in remotes if r.name not in exclude_remotes]
     fetch_tasks = {remote.name: fetch_remote(remote) for remote in remotes}
-    results = dict(
+    results_with_baseexceptions = dict(
         zip(
             fetch_tasks.keys(),
             await asyncio.gather(*fetch_tasks.values(), return_exceptions=True),
             strict=True,
         )
     )
-    for v in results.values():
+    results: dict[RemoteName, Exception | bool] = {}
+    for k, v in results_with_baseexceptions.items():
         if isinstance(v, BaseException) and not isinstance(v, Exception):
             raise v
+        results[k] = v
     return results
 
 
