@@ -13,23 +13,27 @@
 
 Async fetch for all repos in sub-directories.
 
+<!---
+# TODO: add example
+-->
+
 ## Usage
 
-Install the package using pip, or with a dependency manager like uv:
+Install the package using pipx / uv:
 
 ```bash
-pip install git+https://github.com/tsvikas/git-fetch-all.git`
+uv tool install git+https://github.com/tsvikas/git-fetch-all.git`
 ```
 
 <!---
 # TODO: replace with this after uploading to PyPI:
-pip install git-fetch-all
+uv tool install git-fetch-all
 -->
 
-and import the package in your code:
+and run it:
 
-```python
-import git_fetch_all
+```bash
+git-fetch-all /path/to/code/directory
 ```
 
 ## Development
