@@ -5,14 +5,13 @@
 #     "gitpython",
 # ]
 # ///
-"""
-Find all subdirectories with git repos, and fetches from all remotes.
+"""Find all subdirectories with git repos, and fetches from all remotes.
 
 Work asynchronously.
 Run `git-fetch-all -h` for help.
 Requires GitPython package
 """
-# TODO: support submodules
+# TODO: support submodules  # noqa: FIX002
 
 import argparse
 import asyncio
@@ -72,6 +71,7 @@ async def fetch_remotes_in_subfolders(
     *,
     _recursive_head: bool = True,
 ) -> dict[tuple[Path, RemoteName], Exception | bool]:
+    """Fetch all remotes for all repos in this folder."""
     exclude_dirnames = exclude_dirnames or []
 
     try:
@@ -118,6 +118,7 @@ def print_report(
     quiet: bool = False,
     color: bool = False,
 ) -> bool:
+    """Print fetch report."""
     error = False
     for (p, remote), res in fetch_results.items():
         fail = isinstance(res, Exception)
@@ -126,18 +127,19 @@ def print_report(
         status = "𐄂" if fail else "✓" if res else "-"
         color_start = "\033[31m" if color and fail else ""
         color_end = "\033[0m" if color and fail else ""
-        print(
+        print(  # noqa: T201
             f"{color_start}"
             f"{status} {p.relative_to(basedir).as_posix()}:{remote}"
             f"{color_end}"
         )
         if fail:
-            print(indent(str(res), "  "))
+            print(indent(str(res), "  "))  # noqa: T201
             error = True
     return error
 
 
 def main() -> bool:
+    """Fetch all remotes for all repos in this folder, and print report."""
     parser = argparse.ArgumentParser(
         prog="git-fetch-all", description="fetch all git repos in a directory"
     )
