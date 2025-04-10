@@ -35,7 +35,7 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-  "loguru >=0",
+  "gitpython >=0",
   "typer >=0",
 ]
 
@@ -87,7 +87,7 @@ test = [
   "pytest-benchmark ~=5.0",
   "pytest-cov ~=6.0",
   ## fixtures
-  "pytest-loguru >=0",
+  # "pytest-loguru >=0",
   # "freezegun ~=1.0",
   # "hypothesis ~=6.0",
   # "pytest-datadir ~=1.0",
