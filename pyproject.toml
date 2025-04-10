@@ -21,7 +21,7 @@ classifiers = [
   # TODO: choose more classifiers from the list in https://pypi.org/classifiers/
   # i.e.: Environment, Framework, Intended Audience, Topic
   # TODO: update the development status
-  "Development Status :: 1 - Planning",
+  "Development Status :: 4 - Beta",
   # target os
   "Operating System :: OS Independent",
   # python versions
