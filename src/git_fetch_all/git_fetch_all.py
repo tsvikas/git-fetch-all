@@ -1,21 +1,12 @@
-#!/usr/bin/env python3
-# /// script
-# requires-python = ">=3.10"
-# dependencies = [
-#     "gitpython",
-# ]
-# ///
 """Find all subdirectories with git repos, and fetches from all remotes.
 
 Work asynchronously.
 Run `git-fetch-all -h` for help.
-Requires GitPython package
 """
+
 # TODO: support submodules  # noqa: FIX002
 
-import argparse
 import asyncio
-import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from textwrap import indent
@@ -136,51 +127,3 @@ def print_report(
             print(indent(str(res), "  "))  # noqa: T201
             error = True
     return error
-
-
-def main() -> bool:
-    """Fetch all remotes for all repos in this folder, and print report."""
-    parser = argparse.ArgumentParser(
-        prog="git-fetch-all", description="fetch all git repos in a directory"
-    )
-    parser.add_argument(
-        "basedir",
-        metavar="BASE_DIR",
-        type=Path,
-        nargs="?",
-        default=".",
-        help="base directory",
-    )
-    parser.add_argument(
-        "-r", "--recurse", type=int, default=3, help="max recurse in directories"
-    )
-    parser.add_argument(
-        "-i", "--include-remote", action="append", help="only include these remotes"
-    )
-    parser.add_argument(
-        "-x", "--exclude-remote", action="append", help="don't include these remotes"
-    )
-    parser.add_argument(
-        "-d", "--exclude-dirname", action="append", help="don't include these dirs"
-    )
-    parser.add_argument(
-        "-q", "--quiet", action="store_true", help="don't output successful fetches"
-    )
-    parser.add_argument(
-        "-c", "--color", action="store_true", help="output exceptions in red color"
-    )
-    args = parser.parse_args()
-    fetch_results = asyncio.run(
-        fetch_remotes_in_subfolders(
-            args.basedir,
-            args.recurse,
-            args.include_remote,
-            args.exclude_remote,
-            args.exclude_dirname,
-        )
-    )
-    return print_report(fetch_results, args.basedir, quiet=args.quiet, color=args.color)
-
-
-if __name__ == "__main__":
-    sys.exit(main())
