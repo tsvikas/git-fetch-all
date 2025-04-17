@@ -13,9 +13,7 @@
 
 Async fetch for all repos in sub-directories.
 
-<!---
-# TODO: add example
--->
+![Screenshot](assets/screenshot.png)
 
 ## Usage
 
