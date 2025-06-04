@@ -59,7 +59,7 @@ git-fetch-all = "git_fetch_all.cli:app"
 
 
 [tool.uv]
-required-version = "~=0.6.0"
+required-version = ">=0.5.19"
 default-groups = ["dev", "test", "typing"]
 
 

@@ -15,7 +15,7 @@ Async fetch for all repos in sub-directories.
 
 ![Screenshot](assets/screenshot.png)
 
-## Usage
+## Install
 
 Install the package using pipx / uv:
 
@@ -28,7 +28,9 @@ uv tool install git+https://github.com/tsvikas/git-fetch-all.git`
 uv tool install git-fetch-all
 -->
 
-and run it:
+## Usage
+
+Run it with:
 
 ```bash
 git-fetch-all /path/to/code/directory
@@ -53,27 +55,30 @@ git-fetch-all /path/to/code/directory
 - Run a specific tool directly, with
   `uv run pytest`/`ruff`/`mypy`/`black`/`pre-commit`/...
 
-<!---
-Badges to add, when needed:
-# TODO: uncomment after adding RTD documentation
+<!--- Badges to add after adding RTD documentation
 [![Documentation Status][rtd-badge]][rtd-link]
-# TODO: write tests, uncomment this, and follow the link to finish setup:
+
+[rtd-badge]: https://readthedocs.org/projects/git-fetch-all/badge/?version=latest
+[rtd-link]: https://git-fetch-all.readthedocs.io/en/latest/?badge=latest
+-->
+
+<!--- Badges to add after writing tests. Also follow the link to finish setup
 [![codecov][codecov-badge]][codecov-link]
-\
-# TODO: uncomment after uploading to PyPI
+
+[codecov-badge]: https://codecov.io/gh/tsvikas/git-fetch-all/graph/badge.svg
+[codecov-link]: https://codecov.io/gh/tsvikas/git-fetch-all
+-->
+
+<!--- Badges to add after uploading to PyPI
 [![PyPI version][pypi-version-badge]][pypi-link]
 [![PyPI platforms][pypi-platforms-badge]][pypi-link]
 [![Total downloads][pepy-badge]][pepy-link]
 
-[codecov-badge]: https://codecov.io/gh/tsvikas/git-fetch-all/graph/badge.svg
-[codecov-link]: https://codecov.io/gh/tsvikas/git-fetch-all
 [pepy-badge]: https://img.shields.io/pepy/dt/git-fetch-all
 [pepy-link]: https://pepy.tech/project/git-fetch-all
 [pypi-link]: https://pypi.org/project/git-fetch-all/
 [pypi-platforms-badge]: https://img.shields.io/pypi/pyversions/git-fetch-all
 [pypi-version-badge]: https://img.shields.io/pypi/v/git-fetch-all
-[rtd-badge]: https://readthedocs.org/projects/git-fetch-all/badge/?version=latest
-[rtd-link]: https://git-fetch-all.readthedocs.io/en/latest/?badge=latest
 -->
 
 [black-badge]: https://img.shields.io/badge/code%20style-black-000000.svg
