@@ -17,16 +17,11 @@ Async fetch for all repos in sub-directories.
 
 ## Install
 
-Install the package using pipx / uv:
+Install this tool using pipx (or uv):
 
 ```bash
-uv tool install git+https://github.com/tsvikas/git-fetch-all.git`
+pipx install git+https://github.com/tsvikas/git-fetch-all.git
 ```
-
-<!---
-# TODO: replace with this after uploading to PyPI:
-uv tool install git-fetch-all
--->
 
 ## Usage
 
@@ -35,6 +30,8 @@ Run it with:
 ```bash
 git-fetch-all /path/to/code/directory
 ```
+
+Use `git-fetch-all --help` to learn more.
 
 ## Development
 
