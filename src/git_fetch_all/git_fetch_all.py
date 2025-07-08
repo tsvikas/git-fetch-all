@@ -66,12 +66,11 @@ async def fetch_remotes_in_subfolders(
     exclude_dirnames = exclude_dirnames or []
 
     try:
-        repo = Repo(folder, search_parent_directories=False)
+        with Repo(folder, search_parent_directories=False) as repo:
+            result = await fetch_single_repo(repo, include_remotes, exclude_remotes)
+            return {(folder, remote): status for remote, status in result.items()}
     except InvalidGitRepositoryError:
         pass
-    else:
-        result = await fetch_single_repo(repo, include_remotes, exclude_remotes)
-        return {(folder, remote): status for remote, status in result.items()}
 
     if recurse == 0:
         return {}
