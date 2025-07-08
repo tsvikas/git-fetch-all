@@ -55,32 +55,6 @@ git-fetch-all /path/to/code/directory
 - Run a specific tool directly, with
   `uv run pytest`/`ruff`/`mypy`/`black`/`pre-commit`/...
 
-<!--- Badges to add after adding RTD documentation
-[![Documentation Status][rtd-badge]][rtd-link]
-
-[rtd-badge]: https://readthedocs.org/projects/git-fetch-all/badge/?version=latest
-[rtd-link]: https://git-fetch-all.readthedocs.io/en/latest/?badge=latest
--->
-
-<!--- Badges to add after writing tests. Also follow the link to finish setup
-[![codecov][codecov-badge]][codecov-link]
-
-[codecov-badge]: https://codecov.io/gh/tsvikas/git-fetch-all/graph/badge.svg
-[codecov-link]: https://codecov.io/gh/tsvikas/git-fetch-all
--->
-
-<!--- Badges to add after uploading to PyPI
-[![PyPI version][pypi-version-badge]][pypi-link]
-[![PyPI platforms][pypi-platforms-badge]][pypi-link]
-[![Total downloads][pepy-badge]][pepy-link]
-
-[pepy-badge]: https://img.shields.io/pepy/dt/git-fetch-all
-[pepy-link]: https://pepy.tech/project/git-fetch-all
-[pypi-link]: https://pypi.org/project/git-fetch-all/
-[pypi-platforms-badge]: https://img.shields.io/pypi/pyversions/git-fetch-all
-[pypi-version-badge]: https://img.shields.io/pypi/v/git-fetch-all
--->
-
 [black-badge]: https://img.shields.io/badge/code%20style-black-000000.svg
 [black-link]: https://github.com/psf/black
 [github-discussions-badge]: https://img.shields.io/static/v1?label=Discussions&message=Ask&color=blue&logo=github
