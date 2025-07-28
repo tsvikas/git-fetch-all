@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from textwrap import indent
 
-from git import InvalidGitRepositoryError, Repo
+from git import GitCommandError, InvalidGitRepositoryError, Repo
 from git.remote import Remote
 
 RemoteName = str
@@ -123,6 +123,9 @@ def print_report(
             f"{color_end}"
         )
         if fail:
-            print(indent(str(res), "  "))  # noqa: T201
+            res_str = (
+                res.stderr.strip() if isinstance(res, GitCommandError) else str(res)
+            )
+            print(indent(res_str, "    "))  # noqa: T201
             error = True
     return error
