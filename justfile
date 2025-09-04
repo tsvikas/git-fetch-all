@@ -42,7 +42,7 @@ format-and-check:
 check:
   just test
   uv run mypy
-  uv run pre-commit run --all-files --show-diff-on-failure
+  uv run pre-commit run --all-files
 
 # Format code and files
 format:
@@ -66,7 +66,7 @@ pylint:
 
 # Run tests with pytest
 test:
-  uv run --exact pytest
+  uv run --all-extras --exact pytest
 
 # add a new version tag
 tag version commit="HEAD": (_assert-legal-version version)
@@ -85,3 +85,13 @@ check-at-commit commit:
 
 tag-skip-check version commit: (_assert-legal-version version)
   git tag -a v{{ version }} -m "Release v{{ version }}" {{ commit }}
+
+build-docs-ref:
+  rm -rf docs/reference
+  uv run --python 3.13 --only-group docs scripts/gen_ref_pages.py
+
+build-docs: build-docs-ref
+  uv run --python 3.13 --only-group docs mkdocs build
+
+serve-docs: build-docs-ref
+  uv run --python 3.13 --only-group docs mkdocs serve

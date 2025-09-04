@@ -1,6 +1,6 @@
 """git-fetch-all: Async fetch for all repos in sub-directories.
 
-Copyright (c) 2025 Tsvika Shapira. All rights reserved.
+© 2025 Tsvika Shapira. Some rights reserved.
 """
 
 from ._version import version as _version
