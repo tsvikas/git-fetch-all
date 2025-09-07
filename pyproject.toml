@@ -44,7 +44,7 @@ urls.issues = "https://github.com/tsvikas/git-fetch-all/issues"
 requires-python = ">=3.10"
 dependencies = [
   "gitpython >=3.1.15",
-  "typer >=0.13",
+  "typer >=0.16",
 ]
 
 [project.optional-dependencies]
