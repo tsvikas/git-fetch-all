@@ -6,7 +6,7 @@ from typing import Annotated
 import typer
 
 from . import __version__
-from .git_fetch_all import fetch_remotes_in_subfolders, print_report
+from .git_fetch_all import fetch_remotes_in_subfolders, format_report
 
 app = typer.Typer()
 
@@ -65,4 +65,7 @@ def git_fetch_all(  # noqa: PLR0913
         exclude_remote,
         exclude_dirname,
     )
-    return print_report(fetch_results, base_dir, quiet=quiet, color=color)
+    failed_fatches = any(isinstance(res, Exception) for res in fetch_results.values())
+    report = format_report(fetch_results, base_dir, quiet=quiet, color=color)
+    print(report)
+    return failed_fatches

@@ -3,76 +3,49 @@
 from pathlib import Path
 
 from git import GitCommandError
-from pytest_mock import MockerFixture
 
 from git_fetch_all.git_fetch_all import (
-    print_report,
+    format_report,
 )
 
 
-def test_print_report_with_error(mocker: MockerFixture, tmp_path: Path) -> None:
+def test_format_report_with_error() -> None:
     """Test printing results with errors."""
-    mock_print = mocker.patch("builtins.print")
-    mock_indent = mocker.patch(
-        "git_fetch_all.git_fetch_all.indent", return_value="    error message"
-    )
-
+    base_dir = Path("/fake-path")
     error = GitCommandError("git fetch", stderr="fetch failed")
     fetch_results: dict[tuple[Path, str], Exception | bool] = {
-        (tmp_path / "repo1", "origin"): error,
+        (base_dir / "repo1", "origin"): error,
     }
-
-    result = print_report(fetch_results, tmp_path)
-
-    assert result is True  # Has errors
-    mock_print.assert_any_call("𐄂 repo1:origin")
-    mock_print.assert_any_call("    error message")
-    mock_indent.assert_called_once_with("stderr: 'fetch failed'", "    ")
+    result = format_report(fetch_results, base_dir)
+    assert result == "𐄂 repo1:origin\n    stderr: 'fetch failed'"
 
 
-def test_print_report_quiet_mode(mocker: MockerFixture, tmp_path: Path) -> None:
+def test_format_report_quiet_mode() -> None:
     """Test quiet mode only shows errors."""
-    mock_print = mocker.patch("builtins.print")
-
+    base_dir = Path("/fake-path")
     error = Exception("some error")
     fetch_results: dict[tuple[Path, str], Exception | bool] = {
-        (tmp_path / "repo1", "origin"): True,  # Success - should be hidden
-        (tmp_path / "repo2", "origin"): error,  # Error - should be shown
+        (base_dir / "repo1", "origin"): True,
+        (base_dir / "repo2", "origin"): False,
+        (base_dir / "repo3", "origin"): error,
     }
-
-    result = print_report(fetch_results, tmp_path, quiet=True)
-
-    assert result is True
-    assert mock_print.call_count == 2  # Only error output
-    mock_print.assert_any_call("𐄂 repo2:origin")
+    result = format_report(fetch_results, base_dir, quiet=True)
+    assert result == "𐄂 repo3:origin\n    some error"
 
 
-def test_print_report_with_color(mocker: MockerFixture, tmp_path: Path) -> None:
+def test_format_report_with_color() -> None:
     """Test colored output for errors."""
-    mock_print = mocker.patch("builtins.print")
+    base_dir = Path("/fake-path")
     error = Exception("test error")
     fetch_results: dict[tuple[Path, str], Exception | bool] = {
-        (tmp_path / "repo1", "origin"): True,
-        (tmp_path / "repo2", "origin"): error,
+        (base_dir / "repo1", "origin"): True,
+        (base_dir / "repo2", "origin"): False,
+        (base_dir / "repo3", "origin"): error,
     }
-
-    result = print_report(fetch_results, tmp_path, color=True)
-
-    assert result is True
-    mock_print.assert_any_call("✓ repo1:origin")
-    mock_print.assert_any_call("\033[31m𐄂 repo2:origin\033[0m")
-
-
-def test_print_report_git_command_error(mocker: MockerFixture, tmp_path: Path) -> None:
-    """Test handling GitCommandError specifically."""
-    mock_indent = mocker.patch(
-        "git_fetch_all.git_fetch_all.indent", return_value="    stripped error"
+    result = format_report(fetch_results, base_dir, color=True)
+    color_start = "\033[31m"
+    color_end = "\033[0m"
+    assert (
+        result == "✓ repo1:origin\n- repo2:origin\n"
+        f"{color_start}𐄂 repo3:origin{color_end}\n    test error"
     )
-    error = GitCommandError("git fetch", stderr="  error with whitespace  ")
-    fetch_results: dict[tuple[Path, str], Exception | bool] = {
-        (tmp_path / "repo1", "origin"): error,
-    }
-
-    print_report(fetch_results, tmp_path)
-
-    mock_indent.assert_called_once_with("stderr: '  error with whitespace  '", "    ")

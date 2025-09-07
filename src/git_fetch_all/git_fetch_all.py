@@ -120,15 +120,15 @@ def fetch_remotes_in_subfolders(
     )
 
 
-def print_report(
+def format_report(
     fetch_results: dict[tuple[Path, RemoteName], Exception | bool],
     basedir: Path,
     *,
     quiet: bool = False,
     color: bool = False,
-) -> bool:
-    """Print fetch report."""
-    error = False
+) -> str:
+    """Format fetch report."""
+    report = []
     for (p, remote), res in fetch_results.items():
         fail = isinstance(res, Exception)
         if quiet and not fail:
@@ -136,7 +136,7 @@ def print_report(
         status = "𐄂" if fail else "✓" if res else "-"
         color_start = "\033[31m" if color and fail else ""
         color_end = "\033[0m" if color and fail else ""
-        print(  # noqa: T201
+        report.append(
             f"{color_start}"
             f"{status} {p.relative_to(basedir).as_posix()}:{remote}"
             f"{color_end}"
@@ -145,6 +145,5 @@ def print_report(
             res_str = (
                 res.stderr.strip() if isinstance(res, GitCommandError) else str(res)
             )
-            print(indent(res_str, "    "))  # noqa: T201
-            error = True
-    return error
+            report.append(indent(res_str, "    "))
+    return "\n".join(report)
