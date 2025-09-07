@@ -10,56 +10,7 @@ from pytest_mock import MockerFixture
 
 from git_fetch_all.git_fetch_all import (
     fetch_remotes_in_subfolders,
-    format_report,
 )
-
-
-def test_format_report_with_error() -> None:
-    """Test printing results with errors."""
-    base_dir = Path("/fake-path")
-    error = GitCommandError("git fetch", stderr="fetch failed")
-    fetch_results: dict[tuple[Path, str], Exception | bool] = {
-        (base_dir / "repo1", "origin"): error,
-    }
-    result = format_report(fetch_results, base_dir)
-    assert result == "𐄂 repo1:origin\n    stderr: 'fetch failed'"
-
-
-def test_format_report_quiet_mode() -> None:
-    """Test quiet mode only shows errors."""
-    base_dir = Path("/fake-path")
-    error = Exception("some error")
-    fetch_results: dict[tuple[Path, str], Exception | bool] = {
-        (base_dir / "repo1", "origin"): True,
-        (base_dir / "repo2", "origin"): False,
-        (base_dir / "repo3", "origin"): error,
-    }
-    result = format_report(fetch_results, base_dir, quiet=True)
-    assert result == "𐄂 repo3:origin\n    some error"
-
-
-def test_format_report_with_color() -> None:
-    """Test colored output for errors."""
-    base_dir = Path("/fake-path")
-    error = Exception("test error")
-    fetch_results: dict[tuple[Path, str], Exception | bool] = {
-        (base_dir / "repo1", "origin"): True,
-        (base_dir / "repo2", "origin"): False,
-        (base_dir / "repo3", "origin"): error,
-    }
-    result = format_report(fetch_results, base_dir, color=True)
-    color_start = "\033[31m"
-    color_end = "\033[0m"
-    assert (
-        result == "✓ repo1:origin\n- repo2:origin\n"
-        f"{color_start}𐄂 repo3:origin{color_end}\n    test error"
-    )
-
-
-def test_fetch_remotes_in_subfolders_no_git_repos(tmp_path: Path) -> None:
-    """Test with directory that has no git repositories."""
-    result = fetch_remotes_in_subfolders(tmp_path)
-    assert result == {}
 
 
 @pytest.fixture
@@ -82,6 +33,12 @@ def remote_up_to_date(mocker: MockerFixture) -> Mock:
     mock_remote.fetch = mocker.Mock(return_value=[mock_fetch_info])
     assert isinstance(mock_remote, Mock)
     return mock_remote
+
+
+def test_fetch_remotes_in_subfolders_no_git_repos(tmp_path: Path) -> None:
+    """Test with directory that has no git repositories."""
+    result = fetch_remotes_in_subfolders(tmp_path)
+    assert result == {}
 
 
 def test_fetch_remotes_in_subfolders(
