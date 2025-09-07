@@ -1,6 +1,5 @@
 """CLI for git_fetch_all."""
 
-import asyncio
 from pathlib import Path
 from typing import Annotated
 
@@ -59,13 +58,11 @@ def git_fetch_all(  # noqa: PLR0913
     ] = None,
 ) -> bool:
     """Fetch all remotes for all repos in a directory."""
-    fetch_results = asyncio.run(
-        fetch_remotes_in_subfolders(
-            base_dir,
-            recurse,
-            include_remote,
-            exclude_remote,
-            exclude_dirname,
-        )
+    fetch_results = fetch_remotes_in_subfolders(
+        base_dir,
+        recurse,
+        include_remote,
+        exclude_remote,
+        exclude_dirname,
     )
     return print_report(fetch_results, base_dir, quiet=quiet, color=color)

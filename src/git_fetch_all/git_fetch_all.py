@@ -53,7 +53,7 @@ async def fetch_single_repo(
     return results
 
 
-async def fetch_remotes_in_subfolders(
+async def async_fetch_remotes_in_subfolders(
     folder: Path,
     recurse: int = 3,
     include_remotes: list[RemoteName] | None = None,
@@ -62,7 +62,7 @@ async def fetch_remotes_in_subfolders(
     *,
     _recursive_head: bool = True,
 ) -> dict[tuple[Path, RemoteName], Exception | bool]:
-    """Fetch all remotes for all repos in this folder."""
+    """Fetch all remotes for all repos in this folder, async."""
     exclude_dirnames = exclude_dirnames or []
 
     try:
@@ -83,7 +83,7 @@ async def fetch_remotes_in_subfolders(
         and folder.name not in exclude_dirnames
     ]
     tasks = [
-        fetch_remotes_in_subfolders(
+        async_fetch_remotes_in_subfolders(
             folder,
             recurse - 1,
             include_remotes,
@@ -99,6 +99,25 @@ async def fetch_remotes_in_subfolders(
     for subfolder_result in subfolder_results:
         fetched = fetched | subfolder_result
     return fetched
+
+
+def fetch_remotes_in_subfolders(
+    folder: Path,
+    recurse: int = 3,
+    include_remotes: list[RemoteName] | None = None,
+    exclude_remotes: list[RemoteName] | None = None,
+    exclude_dirnames: list[str] | None = None,
+) -> dict[tuple[Path, RemoteName], Exception | bool]:
+    """Fetch all remotes for all repos in a directory."""
+    return asyncio.run(
+        async_fetch_remotes_in_subfolders(
+            folder,
+            recurse,
+            include_remotes,
+            exclude_remotes,
+            exclude_dirnames,
+        )
+    )
 
 
 def print_report(
