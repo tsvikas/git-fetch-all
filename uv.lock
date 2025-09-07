@@ -386,7 +386,7 @@ typing = [
 
 [package.metadata]
 requires-dist = [
-    { name = "gitpython", specifier = ">=3.1" },
+    { name = "gitpython", specifier = ">=3.1.15" },
     { name = "typer", specifier = ">=0.13" },
 ]
 
