@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from colorama import Fore
 from git import GitCommandError
 
 from git_fetch_all.git_fetch_all import (
@@ -43,8 +44,8 @@ def test_format_report_with_color() -> None:
         (base_dir / "repo3", "origin"): error,
     }
     result = format_report(fetch_results, base_dir, color=True)
-    color_start = "\033[31m"
-    color_end = "\033[0m"
+    color_start = Fore.RED
+    color_end = Fore.RESET
     assert (
         result == "✓ repo1:origin\n- repo2:origin\n"
         f"{color_start}𐄂 repo3:origin{color_end}\n    test error"

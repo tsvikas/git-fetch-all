@@ -11,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from textwrap import indent
 
+from colorama import Fore
 from git import GitCommandError, InvalidGitRepositoryError, Repo
 from git.remote import Remote
 
@@ -134,8 +135,8 @@ def format_report(
         if quiet and not fail:
             continue
         status = "𐄂" if fail else "✓" if res else "-"
-        color_start = "\033[31m" if color and fail else ""
-        color_end = "\033[0m" if color and fail else ""
+        color_start = Fore.RED if color and fail else ""
+        color_end = Fore.RESET if color and fail else ""
         report.append(
             f"{color_start}"
             f"{status} {p.relative_to(basedir).as_posix()}:{remote}"

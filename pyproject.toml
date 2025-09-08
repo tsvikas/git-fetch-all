@@ -43,6 +43,7 @@ urls.issues = "https://github.com/tsvikas/git-fetch-all/issues"
 
 requires-python = ">=3.10"
 dependencies = [
+  "colorama >=0.4.6",
   "gitpython >=3.1.15",
   "typer >=0.16",
 ]
@@ -105,6 +106,7 @@ docs = [
 typing = [
   "mypy ~=1.17.0",
   # add "*-stubs" and "types-*" packages here (">=0")
+  "types-colorama >=0",
 ]
 
 
