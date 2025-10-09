@@ -129,7 +129,7 @@ def format_report(
     color: bool = False,
 ) -> str:
     """Format fetch report."""
-    report = []
+    report: list[str] = []
     for (p, remote), res in fetch_results.items():
         fail = isinstance(res, Exception)
         if quiet and not fail:
