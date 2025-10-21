@@ -4,7 +4,7 @@ Work asynchronously.
 Run `git-fetch-all -h` for help.
 """
 
-# TODO: support submodules  # noqa: FIX002
+# TODO: support submodules
 
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
