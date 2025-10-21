@@ -46,7 +46,7 @@ requires-python = ">=3.10"
 dependencies = [
   "colorama >=0.4.6",
   "gitpython >=3.1.15",
-  "typer >=0.16",
+  "cyclopts >=4",
 ]
 
 [project.optional-dependencies]
