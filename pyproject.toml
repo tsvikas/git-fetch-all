@@ -148,6 +148,7 @@ filterwarnings = [
   "default::DeprecationWarning",
   "error::DeprecationWarning:git_fetch_all",
 ]
+log_level = "INFO"
 
 
 [tool.coverage]
