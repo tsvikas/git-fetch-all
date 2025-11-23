@@ -1,5 +1,10 @@
 site_name: git-fetch-all
+site_url: 'https://git-fetch-all.readthedocs.io/'
+site_author: Tsvika Shapira
 site_description: Async fetch for all repos in sub-directories.
+
+repo_name: 'tsvikas/git-fetch-all'
+repo_url: 'https://github.com/tsvikas/git-fetch-all'
 
 theme:
   name: material

@@ -34,13 +34,14 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
   "Typing :: Typed",
 ]
-# urls.homepage = "https://git-fetch-all.readthedocs.io"
-urls.source = "https://github.com/tsvikas/git-fetch-all"
-urls.changelog = "https://github.com/tsvikas/git-fetch-all/blob/main/CHANGELOG.md"
-# urls.releasenotes = "https://github.com/tsvikas/git-fetch-all/releases"
-# urls.documentation = "https://git-fetch-all.readthedocs.io"
-urls.issues = "https://github.com/tsvikas/git-fetch-all/issues"
-# urls.funding = "https://github.com/sponsors/tsvikas"
+# urls.Homepage = "https://git-fetch-all.readthedocs.io"
+urls.Source = "https://github.com/tsvikas/git-fetch-all"
+urls.Changelog = "https://github.com/tsvikas/git-fetch-all/blob/main/CHANGELOG.md"
+# urls.ReleaseNotes = "https://github.com/tsvikas/git-fetch-all/releases"
+# urls.Documentation = "https://git-fetch-all.readthedocs.io"
+urls.Issues = "https://github.com/tsvikas/git-fetch-all/issues"
+# urls.Funding = "https://github.com/sponsors/tsvikas"
+# Discussions = "https://github.com/tsvikas/git-fetch-all/discussions"
 
 requires-python = ">=3.10"
 dependencies = [
@@ -57,11 +58,6 @@ git-fetch-all = "git_fetch_all.cli:app"
 
 [project.gui-scripts]
 # git-fetch-all = "git_fetch_all.gui:app.run"
-
-
-[tool.uv]
-required-version = ">=0.7.3"
-default-groups = ["dev", "test", "typing"]
 
 
 [dependency-groups]
@@ -108,6 +104,11 @@ typing = [
   # add "*-stubs" and "types-*" packages here (">=0")
   "types-colorama >=0",
 ]
+
+
+[tool.uv]
+required-version = ">=0.7.3"
+default-groups = ["dev", "test", "typing"]
 
 
 [tool.hatch]
