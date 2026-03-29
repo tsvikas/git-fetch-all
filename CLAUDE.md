@@ -15,8 +15,7 @@ This project uses `uv` and `just` for development workflow:
 - `uv run just test` - Run pytest tests with coverage
 - `uv run just lint` - Run ruff check and mypy type checking
 - `uv run just format` - Format code with black and sort imports
-- `uv run just check` - Run all quality checks (test, lint, pre-commit)
-- `uv run just format-and-check` - Run both. Use this to test before committing
+- `uv run just format` then `uv run just lint` then `uv run just test` - Use this to test before committing
 
 ### Individual Tools
 
