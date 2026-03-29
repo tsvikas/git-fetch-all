@@ -11,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from textwrap import indent
 
+import anyio
 from colorama import Fore
 from git import GitCommandError, InvalidGitRepositoryError, Repo
 from git.remote import Remote
@@ -77,11 +78,11 @@ async def async_fetch_remotes_in_subfolders(
         return {}
 
     folders = [
-        folder
-        for folder in folder.glob("*")
-        if folder.is_dir()
-        and not folder.name.startswith(".")
-        and folder.name not in exclude_dirnames
+        Path(f)
+        async for f in anyio.Path(folder).glob("*")
+        if await f.is_dir()
+        and not f.name.startswith(".")
+        and f.name not in exclude_dirnames
     ]
     tasks = [
         async_fetch_remotes_in_subfolders(
