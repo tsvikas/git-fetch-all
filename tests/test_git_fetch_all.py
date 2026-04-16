@@ -1,5 +1,6 @@
 """Tests for git_fetch_all core functionality."""
 
+import asyncio
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -10,6 +11,7 @@ from pytest_mock import MockerFixture
 
 from git_fetch_all.git_fetch_all import (
     fetch_remotes_in_subfolders,
+    fetch_single_repo,
 )
 
 
@@ -120,3 +122,69 @@ def test_fetch_remotes_in_subfolders_with_git_error(
     mocker.patch("git.Repo.remotes", [remote_not_up_to_date])
     result = fetch_remotes_in_subfolders(tmp_path)
     assert result == {(git_repo, "origin"): error}
+
+
+def _make_remote(mocker: MockerFixture, name: str) -> Mock:
+    """Create a mock remote with the given name that returns up-to-date status."""
+    mock_fetch_info = mocker.Mock(spec=git.remote.FetchInfo)
+    mock_fetch_info.flags = 1 << 2
+    mock_remote = mocker.Mock(spec=git.remote.Remote)
+    mock_remote.name = name
+    mock_remote.fetch = mocker.Mock(return_value=[mock_fetch_info])
+    assert isinstance(mock_remote, Mock)
+    return mock_remote
+
+
+def test_fetch_remotes_in_subfolders_include_remotes(
+    tmp_path: Path,
+    mocker: MockerFixture,
+) -> None:
+    """Test that include_remotes filters to only the specified remotes."""
+    git_repo_dir = tmp_path / "test_repo"
+    git_repo_dir.mkdir()
+    Repo.init(git_repo_dir)
+
+    origin = _make_remote(mocker, "origin")
+    upstream = _make_remote(mocker, "upstream")
+    mocker.patch("git.Repo.remotes", [origin, upstream])
+
+    result = fetch_remotes_in_subfolders(tmp_path, include_remotes=["upstream"])
+    assert list(result.keys()) == [(git_repo_dir, "upstream")]
+    origin.fetch.assert_not_called()
+
+
+def test_fetch_remotes_in_subfolders_exclude_remotes(
+    tmp_path: Path,
+    mocker: MockerFixture,
+) -> None:
+    """Test that exclude_remotes filters out the specified remotes."""
+    git_repo_dir = tmp_path / "test_repo"
+    git_repo_dir.mkdir()
+    Repo.init(git_repo_dir)
+
+    origin = _make_remote(mocker, "origin")
+    upstream = _make_remote(mocker, "upstream")
+    mocker.patch("git.Repo.remotes", [origin, upstream])
+
+    result = fetch_remotes_in_subfolders(tmp_path, exclude_remotes=["origin"])
+    assert list(result.keys()) == [(git_repo_dir, "upstream")]
+    origin.fetch.assert_not_called()
+
+
+def test_fetch_single_repo_reraises_base_exception(
+    mocker: MockerFixture,
+) -> None:
+    """Test that BaseExceptions (e.g. KeyboardInterrupt) are re-raised, not returned."""
+
+    class FatalError(BaseException):
+        pass
+
+    mock_remote = mocker.Mock(spec=git.remote.Remote)
+    mock_remote.name = "origin"
+    mock_remote.fetch = mocker.Mock(side_effect=FatalError("fatal"))
+
+    mock_repo = mocker.Mock(spec=Repo)
+    mock_repo.remotes = [mock_remote]
+
+    with pytest.raises(FatalError, match="fatal"):
+        asyncio.run(fetch_single_repo(mock_repo))
