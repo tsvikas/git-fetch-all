@@ -46,7 +46,7 @@ urls.Issues = "https://github.com/tsvikas/git-fetch-all/issues"
 requires-python = ">=3.10"
 dependencies = [
   "colorama >=0.4.6",
-  "gitpython >=3.1.15",
+  "gitpython >=3.1.31",
   "cyclopts >=4",
   "anyio>=4.13.0",
 ]
