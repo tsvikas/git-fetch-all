@@ -171,6 +171,38 @@ def test_fetch_remotes_in_subfolders_exclude_remotes(
     origin.fetch.assert_not_called()
 
 
+def test_fetch_remotes_in_subfolders_dedupes_worktrees(
+    tmp_path: Path,
+    mocker: MockerFixture,
+    remote_not_up_to_date: Mock,
+) -> None:
+    """A repo and its linked worktree share a ref store; fetch it only once.
+
+    Linked worktrees share refs/remotes/* with the main checkout, so fetching
+    the same remote from both concurrently races and emits spurious
+    "cannot lock ref" errors. The scan must dedupe by common-dir.
+    """
+    main_repo = tmp_path / "main"
+    main_repo.mkdir()
+    repo = Repo.init(main_repo)
+    with repo.config_writer() as cw:
+        cw.set_value("user", "name", "test")
+        cw.set_value("user", "email", "test@example.com")
+    repo.git.commit("--allow-empty", "-m", "init")
+    repo.git.worktree("add", str(tmp_path / "linked"))
+
+    mocker.patch("git.Repo.remotes", [remote_not_up_to_date])
+    result = fetch_remotes_in_subfolders(tmp_path)
+
+    # The shared ref store is fetched exactly once, reported under one checkout.
+    assert len(result) == 1
+    (reported_path, remote_name), status = next(iter(result.items()))
+    assert remote_name == "origin"
+    assert reported_path in {main_repo, tmp_path / "linked"}
+    assert status is True
+    remote_not_up_to_date.fetch.assert_called_once()
+
+
 def test_fetch_single_repo_reraises_base_exception(
     mocker: MockerFixture,
 ) -> None:

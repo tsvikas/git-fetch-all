@@ -63,12 +63,25 @@ async def async_fetch_remotes_in_subfolders(
     exclude_dirnames: list[str] | None = None,
     *,
     _recursive_head: bool = True,
+    _seen_common_dirs: set[Path] | None = None,
 ) -> dict[tuple[Path, RemoteName], Exception | bool]:
     """Fetch all remotes for all repos in this folder, async."""
     exclude_dirnames = exclude_dirnames or []
+    # Linked git worktrees share one ref store (common-dir) with their main
+    # checkout, so fetching the same remote from two of them concurrently races
+    # on refs/remotes/* and emits spurious "cannot lock ref" errors. Dedupe by
+    # resolved common-dir so each ref store is fetched at most once per run.
+    if _seen_common_dirs is None:
+        _seen_common_dirs = set()
 
     try:
         with Repo(folder, search_parent_directories=False) as repo:
+            common_dir = Path(await anyio.Path(repo.common_dir).resolve())
+            # No await between the membership check and the add, so this
+            # check-and-claim is atomic across the concurrent discovery walk.
+            if common_dir in _seen_common_dirs:
+                return {}
+            _seen_common_dirs.add(common_dir)
             result = await fetch_single_repo(repo, include_remotes, exclude_remotes)
             return {(folder, remote): status for remote, status in result.items()}
     except InvalidGitRepositoryError:
@@ -92,6 +105,7 @@ async def async_fetch_remotes_in_subfolders(
             exclude_remotes,
             exclude_dirnames=[],
             _recursive_head=False,
+            _seen_common_dirs=_seen_common_dirs,
         )
         for folder in folders
     ]
