@@ -4,7 +4,14 @@ import pytest
 from git import Repo
 
 from git_fetch_all import __version__, cli
-from git_fetch_all.cli import EX_SOFTWARE, app, main
+from git_fetch_all.cli import (
+    EX_NOINPUT,
+    EX_NOPERM,
+    EX_SOFTWARE,
+    EX_UNAVAILABLE,
+    app,
+    main,
+)
 
 
 @pytest.fixture
@@ -115,3 +122,27 @@ def test_main_unhandled_error(monkeypatch: pytest.MonkeyPatch) -> None:
     with pytest.raises(SystemExit) as exc_info:
         main()
     assert exc_info.value.code == EX_SOFTWARE
+
+
+@pytest.mark.parametrize(
+    ("exc_type", "code"),
+    [
+        (FileNotFoundError, EX_NOINPUT),
+        (PermissionError, EX_NOPERM),
+        (ConnectionRefusedError, EX_UNAVAILABLE),
+    ],
+)
+def test_main_reported_error(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    exc_type: type[OSError],
+    code: int,
+) -> None:
+    def explode(*_args: object, **_kwargs: object) -> None:
+        raise exc_type("boom")
+
+    monkeypatch.setattr(cli, "app", explode)
+    with pytest.raises(SystemExit) as exc_info:
+        main()
+    assert exc_info.value.code == code
+    assert capsys.readouterr().err == "error: boom\n"
