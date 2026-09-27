@@ -18,10 +18,10 @@ Async fetch for all repos in sub-directories.
 
 ## Install
 
-Install this tool using pipx (or uv):
+Install this tool using uv (or pipx):
 
 ```bash
-pipx install git+https://github.com/tsvikas/git-fetch-all.git
+uv tool install git+https://github.com/tsvikas/git-fetch-all.git
 ```
 
 ## Usage
@@ -37,7 +37,7 @@ Use `git-fetch-all --help` to learn more.
 ## Contributing
 
 Interested in contributing?
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guideline.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
 
 [black-badge]: https://img.shields.io/badge/code%20style-black-000000.svg
 [black-link]: https://github.com/psf/black

@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: v0.29.1
+_commit: v0.30.0-10-g7e81e54
 _src_path: gh:tsvikas/python-template
 audit_in_ci: false
 cli_framework: cyclopts
@@ -14,7 +14,7 @@ license: MIT
 package_description: Async fetch for all repos in sub-directories.
 package_name: git_fetch_all
 project_name: git-fetch-all
-python_min: 10
+python_min: 11
 user_email: tsvikas@gmail.com
 user_name: Tsvika Shapira
 year: 2025
