@@ -3,8 +3,8 @@ from pathlib import Path
 import pytest
 from git import Repo
 
-from git_fetch_all import __version__
-from git_fetch_all.cli import app
+from git_fetch_all import __version__, cli
+from git_fetch_all.cli import EX_SOFTWARE, app, main
 
 
 @pytest.fixture
@@ -95,3 +95,23 @@ def test_app_with_changes(
         app([str(temp_git_repo_with_changes)])
     assert exc_info.value.code == 0
     assert capsys.readouterr().out.strip() == "✓ .:origin"
+
+
+def test_main_usage_error() -> None:
+    with pytest.raises(SystemExit) as exc_info:
+        main(["--not-an-option"])
+    # Cyclopts >=5 exits 2 on invalid usage, as argparse, click and clap do.
+    # sysexits(3) would say 64, but 2 is the far wider convention.
+    assert exc_info.value.code == 2
+
+
+def test_main_unhandled_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Accept the call that `main` makes, so that the RuntimeError below is what
+    # reaches it, rather than a TypeError over the signature.
+    def explode(*_args: object, **_kwargs: object) -> None:
+        raise RuntimeError
+
+    monkeypatch.setattr(cli, "app", explode)
+    with pytest.raises(SystemExit) as exc_info:
+        main()
+    assert exc_info.value.code == EX_SOFTWARE
