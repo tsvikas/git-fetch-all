@@ -112,6 +112,32 @@ def test_main_usage_error() -> None:
     assert exc_info.value.code == 2
 
 
+@pytest.mark.parametrize(
+    ("error", "code"),
+    [
+        (FileNotFoundError("missing.txt"), EX_NOINPUT),
+        (PermissionError("locked.txt"), EX_NOPERM),
+        (ConnectionError("down"), EX_UNAVAILABLE),
+        # a subclass lands on its parent's code
+        (ConnectionRefusedError("refused"), EX_UNAVAILABLE),
+    ],
+)
+def test_main_reported_error(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    error: Exception,
+    code: int,
+) -> None:
+    def explode(*_args: object, **_kwargs: object) -> None:
+        raise error
+
+    monkeypatch.setattr(cli, "app", explode)
+    with pytest.raises(SystemExit) as exc_info:
+        main()
+    assert exc_info.value.code == code
+    assert capsys.readouterr().err == f"error: {error}\n"
+
+
 def test_main_unhandled_error(monkeypatch: pytest.MonkeyPatch) -> None:
     # Accept the call that `main` makes, so that the RuntimeError below is what
     # reaches it, rather than a TypeError over the signature.
@@ -122,27 +148,3 @@ def test_main_unhandled_error(monkeypatch: pytest.MonkeyPatch) -> None:
     with pytest.raises(SystemExit) as exc_info:
         main()
     assert exc_info.value.code == EX_SOFTWARE
-
-
-@pytest.mark.parametrize(
-    ("exc_type", "code"),
-    [
-        (FileNotFoundError, EX_NOINPUT),
-        (PermissionError, EX_NOPERM),
-        (ConnectionRefusedError, EX_UNAVAILABLE),
-    ],
-)
-def test_main_reported_error(
-    monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
-    exc_type: type[OSError],
-    code: int,
-) -> None:
-    def explode(*_args: object, **_kwargs: object) -> None:
-        raise exc_type("boom")
-
-    monkeypatch.setattr(cli, "app", explode)
-    with pytest.raises(SystemExit) as exc_info:
-        main()
-    assert exc_info.value.code == code
-    assert capsys.readouterr().err == "error: boom\n"
