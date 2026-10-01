@@ -23,7 +23,7 @@ This project uses `uv` and `just` for development workflow:
 - `uv run mypy` - Type check with mypy
 - `uv run ruff check` - Lint with ruff
 - `uv run black .` - Format code with black
-- `uv run pre-commit run --all-files` - Run all pre-commit hooks
+- `uv run prek run --all-files` - Run all pre-commit hooks
 
 ## Project Architecture
 
