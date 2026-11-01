@@ -32,17 +32,17 @@ This is a Python CLI tool that asynchronously fetches git remotes from multiple 
 ### Core Components
 
 - **CLI Entry Point**: `src/git_fetch_all/cli.py` - Typer-based command line interface with options for recursion depth, remote filtering, output formatting
-- **Core Logic**: `src/git_fetch_all/git_fetch_all.py` - Async implementation using ThreadPoolExecutor for git operations:
-  - `fetch_remote()` - Fetches single remote asynchronously
-  - `fetch_single_repo()` - Fetches all remotes for one repository
+- **Core Logic**: `src/git_fetch_all/git_fetch_all.py` - Async implementation running git in subprocesses:
+  - `fetch_remote()` - Fetches single remote with `git fetch --porcelain`
+  - `fetch_single_repo()` - Fetches all remotes for one repository, one at a time
   - `fetch_remotes_in_subfolders()` - Recursively finds and processes git repos
   - `print_report()` - Formats and displays results with status symbols
 
 ### Key Technologies
 
-- **GitPython** for git operations
+- **GitPython** for finding repos and listing remotes; fetches call git directly
 - **Typer** for CLI interface
-- **asyncio** with ThreadPoolExecutor for concurrent git fetches
+- **asyncio** subprocesses, fetching repos concurrently
 - **uv** for dependency management and task running
 
 ### Testing

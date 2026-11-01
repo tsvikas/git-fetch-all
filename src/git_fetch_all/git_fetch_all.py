@@ -7,7 +7,7 @@ Run `git-fetch-all -h` for help.
 # TODO: support submodules
 
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
+from os import PathLike
 from pathlib import Path
 from textwrap import indent
 
@@ -19,13 +19,33 @@ from git.remote import Remote
 RemoteName = str
 
 
+async def _git(git_dir: str | PathLike[str], *args: str) -> tuple[int, str, str]:
+    """Run git in `git_dir`; return its exit code, stdout and stderr."""
+    proc = await asyncio.create_subprocess_exec(
+        "git",
+        *args,
+        cwd=git_dir,
+        stdin=asyncio.subprocess.DEVNULL,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    stdout, stderr = await proc.communicate()
+    returncode = await proc.wait()
+    return returncode, stdout.decode(), stderr.decode()
+
+
 async def fetch_remote(remote: Remote) -> bool:
-    """Fetch a single remote asynchronously using a thread pool."""
-    loop = asyncio.get_event_loop()
-    with ThreadPoolExecutor() as pool:
-        res = await loop.run_in_executor(pool, remote.fetch)
-        all_uptodate = all((info.flags >> 2) % 2 for info in res)
-        return not all_uptodate
+    """Fetch a single remote in a git subprocess; return whether any ref changed.
+
+    `--porcelain` (git 2.41+) prints one line per changed ref, which replaces
+    parsing the human-readable output as `Remote.fetch()` does.
+    """
+    args = ["fetch", "--porcelain", "--", remote.name]
+    returncode, stdout, stderr = await _git(remote.repo.git_dir, *args)
+    if returncode:
+        raise GitCommandError(["git", *args], returncode, stderr)
+    # "=" marks an up-to-date ref; git prints those only with --verbose.
+    return any(line and line[0] != "=" for line in stdout.splitlines())
 
 
 async def fetch_single_repo(
@@ -33,25 +53,20 @@ async def fetch_single_repo(
     include_remotes: list[RemoteName] | None = None,
     exclude_remotes: list[RemoteName] | None = None,
 ) -> dict[RemoteName, Exception | bool]:
-    """Fetch all remotes for a single repository asynchronously."""
+    """Fetch all remotes for a single repository, one after another."""
     remotes = list(repo.remotes)
     if include_remotes is not None:
         remotes = [r for r in remotes if r.name in include_remotes]
     if exclude_remotes is not None:
         remotes = [r for r in remotes if r.name not in exclude_remotes]
-    fetch_tasks = {remote.name: fetch_remote(remote) for remote in remotes}
-    results_with_baseexceptions = dict(
-        zip(
-            fetch_tasks.keys(),
-            await asyncio.gather(*fetch_tasks.values(), return_exceptions=True),
-            strict=True,
-        )
-    )
+    # One remote at a time: a repo's fetches share FETCH_HEAD, the commit-graph,
+    # tags and maintenance locks. Repos are still fetched concurrently.
     results: dict[RemoteName, Exception | bool] = {}
-    for k, v in results_with_baseexceptions.items():
-        if isinstance(v, BaseException) and not isinstance(v, Exception):
-            raise v
-        results[k] = v
+    for remote in remotes:
+        try:
+            results[remote.name] = await fetch_remote(remote)
+        except Exception as e:  # noqa: BLE001
+            results[remote.name] = e
     return results
 
 
