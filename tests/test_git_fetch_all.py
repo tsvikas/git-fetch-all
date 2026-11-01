@@ -15,24 +15,32 @@ from git_fetch_all.git_fetch_all import (
 )
 
 
+@pytest.fixture(autouse=True)
+def fake_fetch(mocker: MockerFixture) -> None:
+    """Route `fetch_remote` to the mock remote's `fetch`, which returns its result.
+
+    tests/test_fetch_remote.py runs real git against local bare remotes.
+    """
+    mocker.patch(
+        "git_fetch_all.git_fetch_all.fetch_remote",
+        side_effect=lambda remote: remote.fetch(),
+    )
+
+
 @pytest.fixture
 def remote_not_up_to_date(mocker: MockerFixture) -> Mock:
-    mock_fetch_info = mocker.Mock(spec=git.remote.FetchInfo)
-    mock_fetch_info.flags = 0 << 2
     mock_remote = mocker.Mock(spec=git.remote.Remote)
     mock_remote.name = "origin"
-    mock_remote.fetch = mocker.Mock(return_value=[mock_fetch_info])
+    mock_remote.fetch = mocker.Mock(return_value=True)
     assert isinstance(mock_remote, Mock)
     return mock_remote
 
 
 @pytest.fixture
 def remote_up_to_date(mocker: MockerFixture) -> Mock:
-    mock_fetch_info = mocker.Mock(spec=git.remote.FetchInfo)
-    mock_fetch_info.flags = 1 << 2
     mock_remote = mocker.Mock(spec=git.remote.Remote)
     mock_remote.name = "origin"
-    mock_remote.fetch = mocker.Mock(return_value=[mock_fetch_info])
+    mock_remote.fetch = mocker.Mock(return_value=False)
     assert isinstance(mock_remote, Mock)
     return mock_remote
 
@@ -126,11 +134,9 @@ def test_fetch_remotes_in_subfolders_with_git_error(
 
 def _make_remote(mocker: MockerFixture, name: str) -> Mock:
     """Create a mock remote with the given name that returns up-to-date status."""
-    mock_fetch_info = mocker.Mock(spec=git.remote.FetchInfo)
-    mock_fetch_info.flags = 1 << 2
     mock_remote = mocker.Mock(spec=git.remote.Remote)
     mock_remote.name = name
-    mock_remote.fetch = mocker.Mock(return_value=[mock_fetch_info])
+    mock_remote.fetch = mocker.Mock(return_value=False)
     assert isinstance(mock_remote, Mock)
     return mock_remote
 
